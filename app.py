@@ -4,8 +4,10 @@ from transformers import pipeline
 from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
+import requests
 
 load_dotenv(find_dotenv())
+HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
 
 # img2text
 
@@ -35,5 +37,19 @@ def generate_story(scenario):
     print(story)
     return story
 
+
+
+def text2speach(message):
+    API_URL = "https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits"
+    headers = {"Authorization": f"Bearer {HUGGINGFACEHUB_API_TOKEN}"}
+    payload = {
+        "inputs": message
+    }
+    
+    response = requests.post(API_URL, headers=headers, json=payload)
+    with open('audio.flac', 'wb') as file:
+        file.write(response.content)
+
 scenario = img2text("dale.png")
 story = generate_story(scenario)
+text2speach(story)
